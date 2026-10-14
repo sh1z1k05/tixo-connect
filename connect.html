@@ -29,7 +29,8 @@ const copy = document.getElementById('copy');
 const status = document.getElementById('status');
 // The key stays in the fragment and browser memory; no requests or analytics use it.
 if (Object.hasOwn(names, app) && key && key.startsWith('vless://') && !/[\u0000-\u0020\u007f]/u.test(key)) {
-  const target = app + '://add/' + key;
+  // Escape the nested URI so its query and fragment survive the app-link parser.
+  const target = app + '://add/' + (app === 'happ' ? encodeURIComponent(key) : key);
   open.href = target;
   open.textContent = 'Открыть ' + names[app] + ' и добавить ключ';
   open.hidden = copy.hidden = install.hidden = false;
