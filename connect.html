@@ -29,19 +29,32 @@ const copy = document.getElementById('copy');
 const status = document.getElementById('status');
 // The key stays in the fragment and browser memory; no requests or analytics use it.
 if (Object.hasOwn(names, app) && key && key.startsWith('vless://') && !/[\u0000-\u0020\u007f]/u.test(key)) {
-  // Escape the nested URI so its query and fragment survive the app-link parser.
-  const target = app + '://add/' + (app === 'happ' ? encodeURIComponent(key) : key);
+  const target = app === 'happ' ? 'happ://' : 'incy://add/' + key;
   open.href = target;
   open.textContent = 'Открыть ' + names[app] + ' и добавить ключ';
   open.hidden = copy.hidden = install.hidden = false;
   install.href = app === 'happ' ? 'https://www.happ.su/main' : 'https://incy.cc/';
   install.textContent = 'Установить ' + names[app];
   description.textContent = 'Открываем ' + names[app] + '. Если переход не произошёл, нажмите кнопку ниже или откройте страницу во внешнем браузере.';
+  if (app === 'happ') {
+    open.textContent = 'Скопировать ключ и открыть Happ';
+    description.textContent = 'Нажмите кнопку ниже, затем в Happ нажмите «Из буфера». Это добавит ваш VPN-профиль.';
+    open.onclick = async event => {
+      event.preventDefault();
+      try {
+        await navigator.clipboard.writeText(key);
+        status.textContent = 'Ключ скопирован. В Happ нажмите «Из буфера».';
+        location.href = target;
+      } catch {
+        status.textContent = 'Не удалось скопировать. Откройте страницу во внешнем браузере или скопируйте ссылку из Telegram.';
+      }
+    };
+  }
   copy.onclick = async () => {
     try { await navigator.clipboard.writeText(key); status.textContent = 'Ключ скопирован. Импортируйте его из буфера обмена.'; }
     catch { status.textContent = 'Не удалось скопировать. Вернитесь в Telegram и скопируйте ссылку над QR.'; }
   };
-  location.href = target;
+  if (app === 'incy') location.href = target;
 } else {
   description.textContent = 'Некорректная ссылка. Получите ключ заново в боте Tixo.';
 }
