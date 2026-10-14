@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ru">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+<title>Tixo VPN — импорт ключа</title>
+<style>
+body{margin:0;background:#071b2f;color:#f4f8fc;font:18px/1.5 system-ui;min-height:100vh;display:grid;place-items:center}main{max-width:480px;padding:28px}h1{font-size:28px}a,button{display:block;margin:16px 0;padding:14px 20px;border:0;border-radius:12px;background:#00d1e5;color:#062030;font:inherit;text-align:center;text-decoration:none;cursor:pointer}p{color:#c7d9e7}a[hidden],button[hidden]{display:none}#status{font-size:16px}
+</style>
+<main>
+<h1>🇸🇪 Tixo VPN</h1>
+<p id="description">Подготовка импорта…</p>
+<a id="open" hidden>Открыть приложение</a>
+<button id="copy" hidden>Скопировать ключ</button>
+<p id="status" role="status"></p>
+<a id="install" hidden target="_blank" rel="noopener noreferrer">Установить приложение</a>
+<p>После импорта подтвердите добавление профиля и включите VPN в приложении.</p>
+</main>
+<script>
+const params = new URLSearchParams(location.hash.slice(1));
+const app = params.get('app');
+const key = params.get('key');
+const names = {happ: 'Happ', incy: 'INCY'};
+const description = document.getElementById('description');
+const open = document.getElementById('open');
+const install = document.getElementById('install');
+const copy = document.getElementById('copy');
+const status = document.getElementById('status');
+// The key stays in the fragment and browser memory; no requests or analytics use it.
+if (Object.hasOwn(names, app) && key && key.startsWith('vless://') && !/[\u0000-\u0020\u007f]/u.test(key)) {
+  const target = app + '://add/' + key;
+  open.href = target;
+  open.textContent = 'Открыть ' + names[app] + ' и добавить ключ';
+  open.hidden = copy.hidden = install.hidden = false;
+  install.href = app === 'happ' ? 'https://www.happ.su/main' : 'https://incy.cc/';
+  install.textContent = 'Установить ' + names[app];
+  description.textContent = 'Открываем ' + names[app] + '. Если переход не произошёл, нажмите кнопку ниже или откройте страницу во внешнем браузере.';
+  copy.onclick = async () => {
+    try { await navigator.clipboard.writeText(key); status.textContent = 'Ключ скопирован. Импортируйте его из буфера обмена.'; }
+    catch { status.textContent = 'Не удалось скопировать. Вернитесь в Telegram и скопируйте ссылку над QR.'; }
+  };
+  location.href = target;
+} else {
+  description.textContent = 'Некорректная ссылка. Получите ключ заново в боте Tixo.';
+}
+</script>
+</html>
